@@ -24,9 +24,30 @@ cave_map = {
 }
 
 
-def main():
-    print('Hello World!')
+class Game:
+    def __init__(self):
+        # pick 6 random starting locations for the 2 pits, 2 bats, wumpus, and player
+        random_locations = random.sample(sorted(cave_map.keys()), 6)
+
+        self.wumpus = random_locations[0]
+        self.player = random_locations[1]
+        self.super_bats = random_locations[2:4]
+        self.bottomless_pits = random_locations[4:6]
+
+    def take_turn(self):
+        # lookup which caves are adjacent to the cave the player is in
+        caves_near_player = cave_map.get(self.player)
+        # is the wumpus nearby
+        if self.wumpus in caves_near_player:
+            print('I smell a wumpus!')
+        # is there a pit nearby
+        if self.bottomless_pits[0] in caves_near_player or self.bottomless_pits[1] in caves_near_player:
+            print('I feel a draft')
+        # is there a bat nearby
+        if self.super_bats[0] in caves_near_player or self.super_bats[1] in caves_near_player:
+            print('Bats nearby!')
 
 
 if __name__ == '__main__':
-    main()
+    hunt_the_wumpus = Game()
+    hunt_the_wumpus.take_turn()

@@ -12,22 +12,22 @@ class HuntTheWumpus:
         self.player_location = random_locations[1]
         self.super_bats = random_locations[2:4]
         self.bottomless_pits = random_locations[4:6]
-        self.running = True
 
         self.start_game()
 
     def start_game(self):
-        while self.running:
+        while True:
             print("HUNT THE WUMPUS")
-            self.game_loop()
-
-            replay = handle_input("SAME SET-UP? (Y-N)?", ['y', 'n'])
-            if replay == 'Y':
-                self.running = True
+            if self.game_loop():
+                print("CONGRATULATIONS YOU WON")
+                break
             else:
                 print("Game Over")
+                replay = handle_input("SAME SET-UP? (Y-N)?", ['y', 'n'])
+                if replay == 'n':
+                    break
 
-    def game_loop(self):
+    def game_loop(self) -> bool:
         while True:
             # lookup which caves are adjacent to the hunter
             caves_near_player = cave_map.get(self.player_location)
@@ -51,6 +51,7 @@ class HuntTheWumpus:
                 if self.player_location in self.bottomless_pits:
                     print("YYYIIIIEEEE . . . FELL IN PIT")
                     print("HA HA HA - YOU LOSE!")
+                    return False
                 elif self.player_location in self.super_bats:
                     print("ZAP--SUPER BAT SNATCH! ELSEWHEREVILLE FOR YOU!")
                     self.player_location = random.choice(cave_map.keys())
@@ -59,14 +60,30 @@ class HuntTheWumpus:
                     if roll_dice(4) == 4:
                         # failed the 25% dice roll. you ded
                         print("tsk tsk tsk- Wumpus got you!")
+                        return False
                     else:
                         print("... oops! Bumped a wumpus!")
                         # move the wumpus to a nearby room
                         self.wumpus_location = random.choice(cave_map.get(self.wumpus_location))
             else:
                 # arrow
-                pass
-
+                arrow_distance = handle_input("No. of rooms(1-5)?", [str(num + 1) for num in range(5)])
+                arrow_location = self.player_location
+                for _ in range(int(arrow_distance)):
+                    next_cave = handle_input("Room #?", [str(cave_num) for cave_num in cave_map.keys()])
+                    adjacent_caves = cave_map.get(arrow_location)
+                    if next_cave in adjacent_caves:
+                        # if location is adjacent, move arrow there
+                        arrow_location = next_cave
+                    else:
+                        # choose at random if it cant
+                        arrow_location = random.choice(adjacent_caves)
+                    if self.player_location == arrow_location:
+                        print("Ouch! Arrow got you!")
+                        return False
+                    elif self.wumpus_location == arrow_location:
+                        print("Aha! You got the Wumpus!")
+                        return True
 
 
 def roll_dice(sides: int) -> int:
